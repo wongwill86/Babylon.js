@@ -2225,7 +2225,9 @@
 
         public updateRawTexture(texture: WebGLTexture, data: ArrayBufferView, format: number, invertY: boolean, compression: string = null): void {
             var internalFormat = this._getInternalFormat(format);
-            this._bindTextureDirectly(this._gl.TEXTURE_2D, texture);
+
+            var target = texture._depth === null ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+            this._bindTextureDirectly(target, texture);
             this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, invertY === undefined ? 1 : (invertY ? 1 : 0));
 
             if (texture._width % 4 !== 0) {
@@ -2233,41 +2235,52 @@
             }
 
             if (compression) {
-                this._gl.compressedTexImage2D(this._gl.TEXTURE_2D, 0, this.getCaps().s3tc[compression], texture._width, texture._height, 0, data);
+                if (target == this._gl.TEXTURE_2D) {
+                    this._gl.compressedTexImage2D(this._gl.TEXTURE_2D, 0, this.getCaps().s3tc[compression], texture._width, texture._height, 0, data);
+                } else {
+                    this._gl.compressedTexImage3D(this._gl.TEXTURE_3D, 0, this.getCaps().s3tc[compression], texture._width, texture._height, texture._depth, 0, data);
+                }
             } else {
-                this._gl.texImage2D(this._gl.TEXTURE_2D, 0, internalFormat, texture._width, texture._height, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
+                if (target == this._gl.TEXTURE_2D) {
+                    this._gl.texImage2D(this._gl.TEXTURE_2D, 0, internalFormat, texture._width, texture._height, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
+                } else {
+                    this._gl.texImage3D(this._gl.TEXTURE_3D, 0, internalFormat, texture._width, texture._height, texture._depth, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
+                }
             }
 
             if (texture.generateMipMaps) {
-                this._gl.generateMipmap(this._gl.TEXTURE_2D);
+                this._gl.generateMipmap(target);
             }
-            this._bindTextureDirectly(this._gl.TEXTURE_2D, null);
+            this._bindTextureDirectly(target, null);
             this.resetTextureCache();
             texture.isReady = true;
         }
 
-        public createRawTexture(data: ArrayBufferView, width: number, height: number, format: number, generateMipMaps: boolean, invertY: boolean, samplingMode: number, compression: string = null): WebGLTexture {
+        public createRawTexture(data: ArrayBufferView, width: number, height: number, depth: number, format: number, generateMipMaps: boolean, invertY: boolean, samplingMode: number, compression: string = null): WebGLTexture {
             var texture = this._gl.createTexture();
             texture._baseWidth = width;
             texture._baseHeight = height;
+            texture._baseDepth = depth;
             texture._width = width;
             texture._height = height;
+            texture._depth = depth;
             texture.references = 1;
 
+            target = depth === null ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
             this.updateRawTexture(texture, data, format, invertY, compression);
-            this._bindTextureDirectly(this._gl.TEXTURE_2D, texture);
+            this._bindTextureDirectly(target, texture);
 
             // Filters
             var filters = getSamplingParameters(samplingMode, generateMipMaps, this._gl);
 
-            this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, filters.mag);
-            this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, filters.min);
+            this._gl.texParameteri(target, this._gl.TEXTURE_MAG_FILTER, filters.mag);
+            this._gl.texParameteri(target, this._gl.TEXTURE_MIN_FILTER, filters.min);
 
             if (generateMipMaps) {
-                this._gl.generateMipmap(this._gl.TEXTURE_2D);
+                this._gl.generateMipmap(target);
             }
 
-            this._bindTextureDirectly(this._gl.TEXTURE_2D, null);
+            this._bindTextureDirectly(target, null);
 
             texture.samplingMode = samplingMode;
 
@@ -2936,7 +2949,8 @@
             }
 
             this.activateTexture(this._gl.TEXTURE0 + channel);
-            this._bindTextureDirectly(this._gl.TEXTURE_2D, texture);
+            var target = texture._depth === null ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+            this._bindTextureDirectly(target, texture);
         }
 
         public setTextureFromPostProcess(channel: number, postProcess: PostProcess): void {
