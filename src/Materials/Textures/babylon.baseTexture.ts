@@ -196,7 +196,7 @@
             if (!this.isReady() || !this._texture) {
                 return false;
             }
-            return this._texture._depth === undefined;
+            return this._texture._depth !== undefined;
         }
 
         public dispose(): void {

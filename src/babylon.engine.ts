@@ -2227,7 +2227,7 @@
         public updateRawTexture(texture: WebGLTexture, data: ArrayBufferView, format: number, invertY: boolean, compression: string = null): void {
             var internalFormat = this._getInternalFormat(format);
 
-            var target = texture._depth === null ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+            var target = texture._depth === undefined ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
             this._bindTextureDirectly(target, texture);
             this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, invertY === undefined ? 1 : (invertY ? 1 : 0));
 
@@ -2237,15 +2237,15 @@
 
             if (compression) {
                 if (target == this._gl.TEXTURE_2D) {
-                    this._gl.compressedTexImage2D(this._gl.TEXTURE_2D, 0, this.getCaps().s3tc[compression], texture._width, texture._height, 0, data);
+                    this._gl.compressedTexImage2D(target, 0, this.getCaps().s3tc[compression], texture._width, texture._height, 0, data);
                 } else {
-                    this._gl.compressedTexImage3D(this._gl.TEXTURE_3D, 0, this.getCaps().s3tc[compression], texture._width, texture._height, texture._depth, 0, data);
+                    this._gl.compressedTexImage3D(target, 0, this.getCaps().s3tc[compression], texture._width, texture._height, texture._depth, 0, data);
                 }
             } else {
                 if (target == this._gl.TEXTURE_2D) {
-                    this._gl.texImage2D(this._gl.TEXTURE_2D, 0, internalFormat, texture._width, texture._height, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
+                    this._gl.texImage2D(target, 0, internalFormat, texture._width, texture._height, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
                 } else {
-                    this._gl.texImage3D(this._gl.TEXTURE_3D, 0, internalFormat, texture._width, texture._height, texture._depth, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
+                    this._gl.texImage3D(target, 0, internalFormat, texture._width, texture._height, texture._depth, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
                 }
             }
 
@@ -2271,7 +2271,7 @@
             texture._depth = depth;
             texture.references = 1;
 
-            var target = depth === null ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+            var target = depth === undefined ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
             this.updateRawTexture(texture, data, format, invertY, compression);
             this._bindTextureDirectly(target, texture);
 
@@ -2734,12 +2734,14 @@
             return texture;
         }
 
-        public updateTextureSize(texture: WebGLTexture, width: number, height: number) {
+        public updateTextureSize(texture: WebGLTexture, width: number, height: number, depth?: number) {
             texture._width = width;
             texture._height = height;
-            texture._size = width * height;
+            texture._depth = depth;
+            texture._size = width * height * depth;
             texture._baseWidth = width;
             texture._baseHeight = height;
+            texture._baseDepth = depth;
         }
 
         public createRawCubeTexture(url: string, scene: Scene, size: number, format: number, type: number, noMipmap: boolean,
@@ -3033,7 +3035,7 @@
 
                 this._setAnisotropicLevel(this._gl.TEXTURE_CUBE_MAP, texture);
             } else {
-                var target = texture._texture._depth === null ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+                var target = texture.is3D() ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
                 this._bindTextureDirectly(target, internalTexture);
 
                 if (internalTexture._cachedWrapU !== texture.wrapU) {
