@@ -39,6 +39,8 @@ interface WebGLRenderingContext {
     createVertexArray(): any;
     bindVertexArray(vao: WebGLVertexArrayObject): void;
     deleteVertexArray(vao: WebGLVertexArrayObject): void;
+	// mixins for webgl2
+	readonly TEXTURE_3D : number;
 }
 
 interface HTMLURL {
@@ -82,12 +84,15 @@ interface WebGLTexture {
     references: number;
     generateMipMaps: boolean;
     type: number;
+	target : number;
     onLoadedCallbacks: Array<Function>;
     _size: number;
     _baseWidth: number;
     _baseHeight: number;
+    _baseDepth: number;
     _width: number;
     _height: number;
+    _depth: number;
     _workingCanvas: HTMLCanvasElement;
     _workingContext: CanvasRenderingContext2D;
     _framebuffer: WebGLFramebuffer;
