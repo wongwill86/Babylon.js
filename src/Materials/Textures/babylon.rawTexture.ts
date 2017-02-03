@@ -3,8 +3,6 @@
         constructor(data: ArrayBufferView, width: number, height: number, depth : number, public format: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE) {
             super(null, scene, !generateMipMaps, invertY);
 
-            var target = depth === null ? scene.getEngine()._gl.TEXTURE_2D : scene.getEngine()._gl.TEXTURE_3D;
-
             this._texture = scene.getEngine().createRawTextureGeneric(data, width, height, depth, format, generateMipMaps, invertY, samplingMode);
 
             this.wrapU = Texture.CLAMP_ADDRESSMODE;
@@ -16,24 +14,24 @@
         }
 
         // Statics
-        public static CreateLuminanceTexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, depth? : number): RawTexture {
-            return new RawTexture(data, width, height, depth, Engine.TEXTUREFORMAT_LUMINANCE, scene, generateMipMaps, invertY, samplingMode);
+        public static CreateLuminanceTexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE): RawTexture {
+            return new RawTexture(data, width, height, undefined, Engine.TEXTUREFORMAT_LUMINANCE, scene, generateMipMaps, invertY, samplingMode);
         }
 
-        public static CreateLuminanceAlphaTexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, depth? : number): RawTexture {
-            return new RawTexture(data, width, height, depth, Engine.TEXTUREFORMAT_LUMINANCE_ALPHA, scene, generateMipMaps, invertY, samplingMode);
+        public static CreateLuminanceAlphaTexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE): RawTexture {
+            return new RawTexture(data, width, height, undefined, Engine.TEXTUREFORMAT_LUMINANCE_ALPHA, scene, generateMipMaps, invertY, samplingMode);
         }
 
-        public static CreateAlphaTexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, depth? : number): RawTexture {
-            return new RawTexture(data, width, height, depth, Engine.TEXTUREFORMAT_ALPHA, scene, generateMipMaps, invertY, samplingMode);
+        public static CreateAlphaTexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE): RawTexture {
+            return new RawTexture(data, width, height, undefined, Engine.TEXTUREFORMAT_ALPHA, scene, generateMipMaps, invertY, samplingMode);
         }
 
-        public static CreateRGBTexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, depth? : number): RawTexture {
-            return new RawTexture(data, width, height, depth, Engine.TEXTUREFORMAT_RGB, scene, generateMipMaps, invertY, samplingMode);
+        public static CreateRGBTexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE): RawTexture {
+            return new RawTexture(data, width, height, undefined, Engine.TEXTUREFORMAT_RGB, scene, generateMipMaps, invertY, samplingMode);
         }
 
-        public static CreateRGBATexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, depth? : number): RawTexture {
-            return new RawTexture(data, width, height, depth, Engine.TEXTUREFORMAT_RGBA, scene, generateMipMaps, invertY, samplingMode);
+        public static CreateRGBATexture(data: ArrayBufferView, width: number, height: number, scene: Scene, generateMipMaps: boolean = true, invertY: boolean = false, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE): RawTexture {
+            return new RawTexture(data, width, height, undefined, Engine.TEXTUREFORMAT_RGBA, scene, generateMipMaps, invertY, samplingMode);
         }
     }
 }
