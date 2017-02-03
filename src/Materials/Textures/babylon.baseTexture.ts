@@ -104,25 +104,43 @@
 
         public getSize(): ISize {
             if (this._texture._width) {
-                return new Size(this._texture._width, this._texture._height);
+                return new Size(this._texture._width, this._texture._height, this._texture._depth);
             }
 
             if (this._texture._size) {
-                return new Size(this._texture._size, this._texture._size);
+                if (!this.is3D()) {
+                    return new Size(this._texture._size, this._texture._size);
+                } else {
+                    return new Size(this._texture._size, this._texture._size, this._texture._size);
+                }
             }
 
-            return Size.Zero();
+            if (!this.is3D()) {
+                return Size.Zero();
+            } else {
+                return Size.Zero3D();
+            }
         }
 
         public getBaseSize(): ISize {
-            if (!this.isReady() || !this._texture)
-                return Size.Zero();
-
-            if (this._texture._size) {
-                return new Size(this._texture._size, this._texture._size);
+            if (!this.isReady() || !this._texture) {
+                if (!this.is3D()) {
+                    return Size.Zero();
+                } else {
+                    return Size.Zero3D();
+                }
             }
 
-            return new Size(this._texture._baseWidth, this._texture._baseHeight);
+            if (this._texture._size) {
+                if (!this.is3D()) {
+                    return new Size(this._texture._size, this._texture._size);
+                } else {
+                    return new Size(this._texture._size, this._texture._size, this._texture._size);
+                }
+
+            }
+
+            return new Size(this._texture._baseWidth, this._texture._baseHeight, this._texture._baseDepth);
         }
 
         public scale(ratio: number): void {
@@ -172,6 +190,13 @@
                 this._scene.getEngine().releaseInternalTexture(this._texture);
                 delete this._texture;
             }
+        }
+
+        public is3D() : boolean {
+            if (!this.isReady() || !this._texture) {
+                return false;
+            }
+            return this._texture._depth === undefined;
         }
 
         public dispose(): void {

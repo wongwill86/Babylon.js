@@ -1726,19 +1726,22 @@
     export interface ISize {
         width: number;
         height: number;
+        depth?: number;
     }
 
     export class Size implements ISize {
         width: number;
         height: number;
+        depth: number;
 
-        public constructor(width: number, height: number) {
+        public constructor(width: number, height: number, depth?: number) {
             this.width = width;
             this.height = height;
+            this.depth = depth;
         }
 
         public toString(): string {
-            return `{W: ${this.width}, H: ${this.height}}`;
+            return `{W: ${this.width}, H: ${this.height}${this.depth !== undefined ? ', D: ' + this.depth : ""}}`;
         }
 
         public getClassName(): string {
@@ -1746,27 +1749,30 @@
         }
 
         public getHashCode(): number {
-            let hash = this.width || 0;
-            hash = (hash * 397) ^ (this.height || 0);
+            let hash = this.depth || 0;
+            hash = (hash * 397) ^ (this.width || 0);
+            hash = (hash * 403) ^ (this.height || 0);
             return hash;
         }
 
         public copyFrom(src: Size) {
             this.width = src.width;
             this.height = src.height;
+            this.depth = src.depth;
         }
 
-        public copyFromFloats(width: number, height: number) {
+        public copyFromFloats(width: number, height: number, depth?: number) {
             this.width = width;
             this.height = height;
+            this.depth = depth;
         }
 
-        public multiplyByFloats(w: number, h: number): Size {
-            return new Size(this.width * w, this.height * h);
+        public multiplyByFloats(w: number, h: number, d?: number): Size {
+            return new Size(this.width * w, this.height * h, this.depth !== undefined ? this.depth * d : undefined);
         }
 
         public clone(): Size {
-            return new Size(this.width, this.height);
+            return new Size(this.width, this.height, this.depth);
         }
 
         public equals(other: Size): boolean {
@@ -1774,32 +1780,43 @@
                 return false;
             }
 
-            return (this.width === other.width) && (this.height === other.height);
+            return (this.width === other.width) && (this.height === other.height) && (this.depth == other.depth);
         }
 
         public get surface(): number {
-            return this.width * this.height;
+            if (this.depth === undefined) {
+                return this.width * this.height;
+            } else {
+                return this.width * this.height * 2 + this.width * this.depth * 2 + this.depth * this.height * 2;
+            }
         }
 
         public static Zero(): Size {
             return new Size(0, 0);
         }
 
+        public static Zero3D(): Size {
+            return new Size(0, 0, 0);
+        }
+
         public add(otherSize: Size): Size {
-            let r = new Size(this.width + otherSize.width, this.height + otherSize.height);
+            let r = new Size(this.width + otherSize.width, this.height + otherSize.height, this.depth !== undefined ? this.depth + otherSize.depth : undefined);
             return r;
         }
 
         public subtract(otherSize: Size): Size {
-            let r = new Size(this.width - otherSize.width, this.height - otherSize.height);
+            let r = new Size(this.width - otherSize.width, this.height - otherSize.height, this.depth !== undefined ? this.depth - otherSize.depth : undefined);
             return r;
         }
 
         public static Lerp(start: Size, end: Size, amount: number): Size {
             var w = start.width + ((end.width - start.width) * amount);
             var h = start.height + ((end.height - start.height) * amount);
-
-            return new Size(w, h);
+            var d;
+            if (start.depth !== undefined) {
+                d = start.depth + ((end.depth - start.depth) * amount);
+            }
+            return new Size(w, h, d);
         }
 
     }
