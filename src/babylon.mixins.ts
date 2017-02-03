@@ -41,6 +41,8 @@ interface WebGLRenderingContext {
     deleteVertexArray(vao: WebGLVertexArrayObject): void;
 	// mixins for webgl2
 	readonly TEXTURE_3D : number;
+    compressedTexImage3D(target: number, level: number, internalformat: number, width: number, height: number, depth: number, border: number, data: ArrayBufferView): void;
+    texImage3D(target: number, level: number, internalformat: number, width: number, height: number, depth: number, border: number, format: number, type: number, pixels?: ArrayBufferView): void;
 }
 
 interface HTMLURL {
