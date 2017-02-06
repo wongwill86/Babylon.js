@@ -49,10 +49,7 @@
         var potWidth = Tools.GetExponentOfTwo(width, engine.getCaps().maxTextureSize);
         var potHeight = Tools.GetExponentOfTwo(height, engine.getCaps().maxTextureSize);
         var potDepth = Tools.GetExponentOfTwo(depth, engine.getCaps().maxTextureSize);
-        var target = gl.TEXTURE_2D;
-        if (depth !== undefined) {
-         target = gl.TEXTURE_3D;
-        }
+        var target = (depth === undefined) ? gl.TEXTURE_2D : gl.TEXTURE_3D;
 
         engine._bindTextureDirectly(target, texture);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, invertY === undefined ? 1 : (invertY ? 1 : 0));
