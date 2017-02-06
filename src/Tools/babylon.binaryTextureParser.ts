@@ -1,0 +1,31 @@
+module BABYLON.Internals {
+    export class BinaryTextureParser implements CustomTextureParser {
+        /**
+         * @param {ArrayBuffer} binary data as an array buffer
+         * @param {height} binary data as an array buffer
+         * @param {width} binary data as an array buffer
+         * @param {depth} binary data as an array buffer
+         * @param {type} binary data as an array buffer
+         */
+        public constructor (public arrayBuffer : any, public height : number, public width: number, public depth: number, public type: number) {
+          console.log('constructing');
+        }
+
+        public upload(gl: WebGLRenderingContext) {
+          console.log("uploading!!!");
+          let target : number = (this.depth === undefined) ? gl.TEXTURE_2D : gl.TEXTURE_3D;
+          let level : number = -1;
+          let internalFormat : number = gl.R8UI;
+          let width : number = this.width;
+          let height : number = this.height;
+          let depth : number = this.depth;
+          let border : number = 0;
+          let format : number = gl.RED_INTEGER;
+          let type : number = gl.UNSIGNED_BYTE;
+          let src : ArrayBufferView = new Uint16Array(this.arrayBuffer)
+          
+          gl.texImage2D(target, level, internalFormat, width, height, border, format, type, src);
+        }
+
+    }
+} 

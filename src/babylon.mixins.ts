@@ -39,8 +39,11 @@ interface WebGLRenderingContext {
     createVertexArray(): any;
     bindVertexArray(vao: WebGLVertexArrayObject): void;
     deleteVertexArray(vao: WebGLVertexArrayObject): void;
-	// mixins for webgl2
-	readonly TEXTURE_3D : number;
+    // mixins for webgl2
+    readonly TEXTURE_3D : number;
+    readonly RED_INTEGER : number;
+    readonly R8UI : number;
+    readonly RED : number;
     compressedTexImage3D(target: number, level: number, internalformat: number, width: number, height: number, depth: number, border: number, data: ArrayBufferView): void;
     texImage3D(target: number, level: number, internalformat: number, width: number, height: number, depth: number, border: number, format: number, type: number, pixels?: ArrayBufferView): void;
 }
