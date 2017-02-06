@@ -43,33 +43,40 @@
         }
     }
 
-    var prepareWebGLTexture = (texture: WebGLTexture, gl: WebGLRenderingContext, scene: Scene, width: number, height: number, invertY: boolean, noMipmap: boolean, isCompressed: boolean,
-        processFunction: (width: number, height: number) => void, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE) => {
+    var prepareWebGLTexture = (texture: WebGLTexture, gl: WebGLRenderingContext, scene: Scene, width: number, height: number, depth: number, invertY: boolean, noMipmap: boolean, isCompressed: boolean,
+        processFunction: (width: number, height: number, depth?: number) => void, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE) => {
         var engine = scene.getEngine();
         var potWidth = Tools.GetExponentOfTwo(width, engine.getCaps().maxTextureSize);
         var potHeight = Tools.GetExponentOfTwo(height, engine.getCaps().maxTextureSize);
+        var potDepth = Tools.GetExponentOfTwo(depth, engine.getCaps().maxTextureSize);
+        var target = gl.TEXTURE_2D;
+        if (depth !== undefined) {
+         target = gl.TEXTURE_3D;
+        }
 
-        engine._bindTextureDirectly(gl.TEXTURE_2D, texture);
+        engine._bindTextureDirectly(target, texture);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, invertY === undefined ? 1 : (invertY ? 1 : 0));
 
         texture._baseWidth = width;
         texture._baseHeight = height;
+        texture._baseDepth = depth;
         texture._width = potWidth;
         texture._height = potHeight;
+        texture._depth = potDepth;
         texture.isReady = true;
 
-        processFunction(potWidth, potHeight);
+        processFunction(potWidth, potHeight, potDepth);
 
         var filters = getSamplingParameters(samplingMode, !noMipmap, gl);
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filters.mag);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filters.min);
+        gl.texParameteri(target, gl.TEXTURE_MAG_FILTER, filters.mag);
+        gl.texParameteri(target, gl.TEXTURE_MIN_FILTER, filters.min);
 
         if (!noMipmap && !isCompressed) {
-            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.generateMipmap(target);
         }
 
-        engine._bindTextureDirectly(gl.TEXTURE_2D, null);
+        engine._bindTextureDirectly(target, null);
 
         engine.resetTextureCache();
         scene._removePendingData(texture);
@@ -2067,7 +2074,7 @@
             return this._textureFormatInUse = null;
         }
 
-        public createTexture(urlArg: string, noMipmap: boolean, invertY: boolean, scene: Scene, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, onLoad: () => void = null, onError: () => void = null, buffer: any = null, fallBack?: WebGLTexture): WebGLTexture {
+        public createTexture(urlArg: string, noMipmap: boolean, invertY: boolean, scene: Scene, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, onLoad: () => void = null, onError: () => void = null, buffer: any = null, fallBack?: WebGLTexture, customTextureParser?: Internals.CustomTextureParserConstructor): WebGLTexture {
             var texture = fallBack ? fallBack : this._gl.createTexture();
 
             var extension: string;
@@ -2096,6 +2103,7 @@
 
             var isDDS = this.getCaps().s3tc && (extension === ".dds");
             var isTGA = (extension === ".tga");
+            var isCustom = (fromData instanceof Array && extension === undefined);
 
             scene._addPendingData(texture);
             texture.url = url;
@@ -2119,12 +2127,20 @@
                 }
             };
             var callback: (arrayBuffer: any) => void;
-            if (isKTX || isTGA || isDDS){
-                if (isKTX) {
+            if (isKTX || isTGA || isDDS || customTextureParser !== undefined){
+                if (customTextureParser !== undefined) {
+                    callback = (data) => {
+                        var textureParser = new customTextureParser(data);
+
+                        prepareWebGLTexture(texture, this._gl, scene, textureParser.width, textureParser.height, textureParser.depth, invertY, noMipmap, false, () => {
+                            textureParser.upload(this._gl);
+                            }, samplingMode);
+                    }
+                } else if(isKTX) {
                     callback = (data) => {
                         var ktx = new Internals.KhronosTextureContainer(data, 1);
     
-                        prepareWebGLTexture(texture, this._gl, scene, ktx.pixelWidth, ktx.pixelHeight, invertY, false, true, () => {
+                        prepareWebGLTexture(texture, this._gl, scene, ktx.pixelWidth, ktx.pixelHeight, undefined, invertY, false, true, () => {
                             ktx.uploadLevels(this._gl, !noMipmap);
                         }, samplingMode);
                     };
@@ -2134,7 +2150,7 @@
 
                         var header = Internals.TGATools.GetTGAHeader(data);
 
-                        prepareWebGLTexture(texture, this._gl, scene, header.width, header.height, invertY, noMipmap, false, () => {
+                        prepareWebGLTexture(texture, this._gl, scene, header.width, header.height, undefined, invertY, noMipmap, false, () => {
                             Internals.TGATools.UploadContent(this._gl, data);
                         }, samplingMode);
                     };
@@ -2144,23 +2160,24 @@
                         var info = Internals.DDSTools.GetDDSInfo(data);
 
                         var loadMipmap = (info.isRGB || info.isLuminance || info.mipmapCount > 1) && !noMipmap && ((info.width >> (info.mipmapCount - 1)) === 1);
-                        prepareWebGLTexture(texture, this._gl, scene, info.width, info.height, invertY, !loadMipmap, info.isFourCC, () => {
+                        prepareWebGLTexture(texture, this._gl, scene, info.width, info.height, undefined, invertY, !loadMipmap, info.isFourCC, () => {
 
                             Internals.DDSTools.UploadDDSLevels(this._gl, this.getCaps().s3tc, data, info, loadMipmap, 1);
                         }, samplingMode);
                     };
-            }
+                } 
 
-            if (!(fromData instanceof Array))
-                Tools.LoadFile(url, data => {
-                    callback(data);
-                }, null, scene.database, true, onerror);
-            else
-                callback(buffer);
+                if (!(fromData instanceof Array))
+                    Tools.LoadFile(url, data => {
+                        callback(data);
+                    }, null, scene.database, true, onerror);
+                else {
+                  callback(buffer);
+                }
 
             } else {
                 var onload = (img) => {
-                    prepareWebGLTexture(texture, this._gl, scene, img.width, img.height, invertY, noMipmap, false, (potWidth, potHeight) => {
+                    prepareWebGLTexture(texture, this._gl, scene, img.width, img.height, undefined, invertY, noMipmap, false, (potWidth, potHeight) => {
                         var isPot = (img.width === potWidth && img.height === potHeight);
                         if (!isPot) {
                             this._prepareWorkingCanvas();
