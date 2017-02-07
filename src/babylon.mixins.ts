@@ -42,6 +42,7 @@ interface WebGLRenderingContext {
     // mixins for webgl2
     readonly TEXTURE_3D : number;
     readonly RED_INTEGER : number;
+    readonly R8 : number;
     readonly R8UI : number;
     readonly RED : number;
     compressedTexImage3D(target: number, level: number, internalformat: number, width: number, height: number, depth: number, border: number, data: ArrayBufferView): void;

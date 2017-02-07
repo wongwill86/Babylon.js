@@ -48,10 +48,11 @@
         var engine = scene.getEngine();
         var potWidth = Tools.GetExponentOfTwo(width, engine.getCaps().maxTextureSize);
         var potHeight = Tools.GetExponentOfTwo(height, engine.getCaps().maxTextureSize);
-        var potDepth = Tools.GetExponentOfTwo(depth, engine.getCaps().maxTextureSize);
+        var potDepth;
         var target = gl.TEXTURE_2D;
         if (depth !== undefined) {
-         target = gl.TEXTURE_3D;
+            target = gl.TEXTURE_3D;
+            potDepth = Tools.GetExponentOfTwo(depth, engine.getCaps().maxTextureSize);
         }
 
         engine._bindTextureDirectly(target, texture);
@@ -3003,6 +3004,7 @@
                 if (this._activeTexturesCache[channel] != null) {
                     this.activateTexture(this._gl["TEXTURE" + channel]);
                     this._bindTextureDirectly(this._gl.TEXTURE_2D, null);
+                    this._bindTextureDirectly(this._gl.TEXTURE_3D, null);
                     this._bindTextureDirectly(this._gl.TEXTURE_CUBE_MAP, null);
                 }
                 return;
@@ -3042,7 +3044,7 @@
 
                 this._setAnisotropicLevel(this._gl.TEXTURE_CUBE_MAP, texture);
             } else {
-                var target = texture.is3D() ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+                var target = texture.is3D() ? this._gl.TEXTURE_3D : this._gl.TEXTURE_2D;
                 this._bindTextureDirectly(target, internalTexture);
 
                 if (internalTexture._cachedWrapU !== texture.wrapU) {

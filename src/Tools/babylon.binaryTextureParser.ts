@@ -8,9 +8,9 @@ module BABYLON.Internals {
          * @param {type} binary data as an array buffer
          */
         public constructor (public arrayBuffer : any, public height : number, public width: number, public depth: number, public type: number) {
-		  this.height = 32;
-		  this.width = 32;
-		  this.depth = undefined;
+            this.height = 128;
+            this.width = 128;
+            this.depth = undefined;
         }
 
         public upload(gl: WebGLRenderingContext) {
@@ -27,6 +27,8 @@ module BABYLON.Internals {
           let src : ArrayBufferView = new Uint8Array(this.arrayBuffer)
           
           gl.texImage2D(target, level, internalFormat, width, height, border, format, type, src);
+          //gl.texImage2D(target, 0, internalFormat, width, height, 0, internalFormat, gl.UNSIGNED_BYTE, data);
+          //gl.texImage2D(target, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById('sumimg'));
         }
 
     }
