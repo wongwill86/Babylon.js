@@ -361,7 +361,7 @@ gulp.task('watch', [], function () {
 });
 
 /**
- * Watch ts files and fire repective tasks + build max file!
+ * Watch ts files and fire respective tasks + build max file!
  */
 gulp.task('watch-build', [], function () {
     var tasks = [gulp.watch(config.core.typescript, ['build'])];
