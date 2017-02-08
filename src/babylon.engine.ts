@@ -2131,10 +2131,10 @@
             if (isKTX || isTGA || isDDS || customTextureParser !== undefined){
                 if (customTextureParser !== undefined) {
                     callback = (data) => {
-                        var textureParser = new customTextureParser(data);
+                        var textureParser = new customTextureParser(this._gl, data);
 
                         prepareWebGLTexture(texture, this._gl, scene, textureParser.width, textureParser.height, textureParser.depth, invertY, noMipmap, false, () => {
-                            textureParser.upload(this._gl);
+                            textureParser.upload();
                             }, samplingMode);
                     }
                 } else if(isKTX) {
