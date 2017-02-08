@@ -14,7 +14,7 @@ module BABYLON.Internals {
         gl : WebGLRenderingContext;
 
         target : number;
-        level : 0;
+        level : number;
         internalFormat : number;
         height : number;
         width : number;
