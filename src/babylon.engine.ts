@@ -48,8 +48,12 @@
         var engine = scene.getEngine();
         var potWidth = Tools.GetExponentOfTwo(width, engine.getCaps().maxTextureSize);
         var potHeight = Tools.GetExponentOfTwo(height, engine.getCaps().maxTextureSize);
-        var potDepth = Tools.GetExponentOfTwo(depth, engine.getCaps().maxTextureSize);
-        var target = (depth === undefined) ? gl.TEXTURE_2D : gl.TEXTURE_3D;
+        var potDepth;
+        var target = gl.TEXTURE_2D;
+        if (depth !== undefined) {
+            target = gl.TEXTURE_3D;
+            potDepth = Tools.GetExponentOfTwo(depth, engine.getCaps().maxTextureSize);
+        }
 
         engine._bindTextureDirectly(target, texture);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, invertY === undefined ? 1 : (invertY ? 1 : 0));
@@ -2100,7 +2104,6 @@
 
             var isDDS = this.getCaps().s3tc && (extension === ".dds");
             var isTGA = (extension === ".tga");
-            var isCustom = (fromData instanceof Array && extension === undefined);
 
             scene._addPendingData(texture);
             texture.url = url;
@@ -2127,10 +2130,10 @@
             if (isKTX || isTGA || isDDS || customTextureParser !== undefined){
                 if (customTextureParser !== undefined) {
                     callback = (data) => {
-                        var textureParser = new customTextureParser(data);
+                        var textureParser = new customTextureParser(this._gl, data);
 
                         prepareWebGLTexture(texture, this._gl, scene, textureParser.width, textureParser.height, textureParser.depth, invertY, noMipmap, false, () => {
-                            textureParser.upload(this._gl);
+                            textureParser.upload();
                             }, samplingMode);
                     }
                 } else if(isKTX) {
@@ -2249,13 +2252,13 @@
             }
 
             if (compression) {
-                if (target == this._gl.TEXTURE_2D) {
+                if (target === this._gl.TEXTURE_2D) {
                     this._gl.compressedTexImage2D(target, 0, this.getCaps().s3tc[compression], texture._width, texture._height, 0, data);
                 } else {
                     this._gl.compressedTexImage3D(target, 0, this.getCaps().s3tc[compression], texture._width, texture._height, texture._depth, 0, data);
                 }
             } else {
-                if (target == this._gl.TEXTURE_2D) {
+                if (target === this._gl.TEXTURE_2D) {
                     this._gl.texImage2D(target, 0, internalFormat, texture._width, texture._height, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
                 } else {
                     this._gl.texImage3D(target, 0, internalFormat, texture._width, texture._height, texture._depth, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
@@ -3000,6 +3003,7 @@
                 if (this._activeTexturesCache[channel] != null) {
                     this.activateTexture(this._gl["TEXTURE" + channel]);
                     this._bindTextureDirectly(this._gl.TEXTURE_2D, null);
+                    this._bindTextureDirectly(this._gl.TEXTURE_3D, null);
                     this._bindTextureDirectly(this._gl.TEXTURE_CUBE_MAP, null);
                 }
                 return;
@@ -3039,7 +3043,7 @@
 
                 this._setAnisotropicLevel(this._gl.TEXTURE_CUBE_MAP, texture);
             } else {
-                var target = texture.is3D() ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+                var target = texture.is3D() ? this._gl.TEXTURE_3D : this._gl.TEXTURE_2D;
                 this._bindTextureDirectly(target, internalTexture);
 
                 if (internalTexture._cachedWrapU !== texture.wrapU) {
