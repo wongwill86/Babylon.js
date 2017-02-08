@@ -2252,13 +2252,13 @@
             }
 
             if (compression) {
-                if (target == this._gl.TEXTURE_2D) {
+                if (target === this._gl.TEXTURE_2D) {
                     this._gl.compressedTexImage2D(target, 0, this.getCaps().s3tc[compression], texture._width, texture._height, 0, data);
                 } else {
                     this._gl.compressedTexImage3D(target, 0, this.getCaps().s3tc[compression], texture._width, texture._height, texture._depth, 0, data);
                 }
             } else {
-                if (target == this._gl.TEXTURE_2D) {
+                if (target === this._gl.TEXTURE_2D) {
                     this._gl.texImage2D(target, 0, internalFormat, texture._width, texture._height, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
                 } else {
                     this._gl.texImage3D(target, 0, internalFormat, texture._width, texture._height, texture._depth, 0, internalFormat, this._gl.UNSIGNED_BYTE, data);
