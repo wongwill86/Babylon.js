@@ -22,29 +22,30 @@ module BABYLON.Internals {
          * 
          * This function can parse the arrayBuffer for gl texture arguments.
          */
-        public constructor (public gl : WebGLRenderingContext, arrayBuffer : any,) {
-            this.target = (this.depth === undefined) ? gl.TEXTURE_2D : gl.TEXTURE_3D;
+        public constructor (public gl : WebGLRenderingContext, arrayBuffer : any) {
             this.level = 0;
-            this.internalFormat = gl.RGBA8UI;
+            this.internalFormat = gl.R8UI;
             this.height = 32;
             this.width = 32;
             this.depth = undefined;
             this.border = 0;
-            this.format = gl.RGBA_INTEGER;
+            this.format = gl.RED_INTEGER;
             this.type = gl.UNSIGNED_BYTE;
             this.src = new Uint8Array(arrayBuffer);
+        
+            this.target = (this.depth === undefined) ? gl.TEXTURE_2D : gl.TEXTURE_3D;
         }
 
         public upload() {
           this.gl.texImage2D(this.target,
-                       this.level,
-                       this.internalFormat,
-                       this.width,
-                       this.height,
-                       this.border,
-                       this.format,
-                       this.type,
-                       this.src);
+                             this.level,
+                             this.internalFormat,
+                             this.width,
+                             this.height,
+                             this.border,
+                             this.format,
+                             this.type,
+                             this.src);
         }
 
     }
