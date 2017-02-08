@@ -363,6 +363,39 @@ gulp.task('watch', [], function () {
     return tasks;
 });
 
+gulp.task('compile-build-default', function (cb) {
+    runSequence("typescript-compile", "build", cb);
+});
+
+/**
+ * Watch ts files and fire respective tasks + build max file!
+ */
+gulp.task('watch-build', [], function () {
+    var tasks = [gulp.watch(config.core.typescript, ["compile-build-default"])];
+
+    config.modules.map(function (module) { 
+        config[module].libraries.map(function (library) {            
+            tasks.push(gulp.watch(library.files, function() { 
+                console.log(library.output);
+                return buildExternalLibrary(library, config[module], true)
+                .pipe(debug()); 
+            }));
+            tasks.push(gulp.watch(library.shaderFiles, function() { 
+                console.log(library.output);
+                return buildExternalLibrary(library, config[module], true)
+                .pipe(debug()) 
+            }));
+            tasks.push(gulp.watch(library.sassFiles, function() { 
+                console.log(library.output);
+                return buildExternalLibrary(library, config[module], true)
+                .pipe(debug()) 
+            }));
+        }); 
+    });
+    
+    return tasks;
+});
+
 /**
  * Embedded local dev env management.
  */
