@@ -32,7 +32,6 @@ module BABYLON.Internals {
             this.border = 0;
             this.format = gl.RGBA_INTEGER;
             this.type = gl.UNSIGNED_BYTE;
-            console.log(arrayBuffer.byteLength);
             this.src = new Uint8Array(arrayBuffer);
         }
 
