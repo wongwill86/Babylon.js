@@ -2104,7 +2104,6 @@
 
             var isDDS = this.getCaps().s3tc && (extension === ".dds");
             var isTGA = (extension === ".tga");
-            var isCustom = (fromData instanceof Array && extension === undefined);
 
             scene._addPendingData(texture);
             texture.url = url;
