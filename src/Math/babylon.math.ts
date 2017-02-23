@@ -2190,21 +2190,29 @@
     export interface ISize {
         width: number;
         height: number;
+        depth?: number;
     }
 
     export class Size implements ISize {
         width: number;
         height: number;
+<<<<<<< HEAD
         /**
          * Creates a Size object from the passed width and height (floats).  
          */
         public constructor(width: number, height: number) {
+=======
+        depth: number;
+
+        public constructor(width: number, height: number, depth?: number) {
+>>>>>>> bc4f57a... Allow for 3d texture sizes
             this.width = width;
             this.height = height;
+            this.depth = depth;
         }
         // Returns a string with the Size width and height.  
         public toString(): string {
-            return `{W: ${this.width}, H: ${this.height}}`;
+            return `{W: ${this.width}, H: ${this.height}${this.depth !== undefined ? ', D: ' + this.depth : ""}}`;
         }
         /** 
          * Returns the string "Size"
@@ -2216,8 +2224,9 @@
          * Returns the Size hash code.  
          */
         public getHashCode(): number {
-            let hash = this.width || 0;
-            hash = (hash * 397) ^ (this.height || 0);
+            let hash = this.depth || 0;
+            hash = (hash * 397) ^ (this.width || 0);
+            hash = (hash * 403) ^ (this.height || 0);
             return hash;
         }
         /**
@@ -2227,7 +2236,9 @@
         public copyFrom(src: Size) {
             this.width = src.width;
             this.height = src.height;
+            this.depth = src.depth;
         }
+<<<<<<< HEAD
         /**
          * Updates in place the current Size from the passed floats.  
          * Returns the updated Size.   
@@ -2242,12 +2253,23 @@
          */
         public multiplyByFloats(w: number, h: number): Size {
             return new Size(this.width * w, this.height * h);
+=======
+
+        public copyFromFloats(width: number, height: number, depth?: number) {
+            this.width = width;
+            this.height = height;
+            this.depth = depth;
+        }
+
+        public multiplyByFloats(w: number, h: number, d?: number): Size {
+            return new Size(this.width * w, this.height * h, this.depth !== undefined ? this.depth * d : undefined);
+>>>>>>> bc4f57a... Allow for 3d texture sizes
         }
         /**
          * Returns a new Size copied from the passed one.  
          */
         public clone(): Size {
-            return new Size(this.width, this.height);
+            return new Size(this.width, this.height, this.depth);
         }
         /**
          * Boolean : True if the current Size and the passed one width and height are strictly equal.  
@@ -2256,13 +2278,22 @@
             if (!other) {
                 return false;
             }
+<<<<<<< HEAD
             return (this.width === other.width) && (this.height === other.height);
+=======
+
+            return (this.width === other.width) && (this.height === other.height) && (this.depth == other.depth);
+>>>>>>> bc4f57a... Allow for 3d texture sizes
         }
         /**
          * Returns the surface of the Size : width * height (float).  
          */
         public get surface(): number {
-            return this.width * this.height;
+            if (this.depth === undefined) {
+                return this.width * this.height;
+            } else {
+                return this.width * this.height * 2 + this.width * this.depth * 2 + this.depth * this.height * 2;
+            }
         }
         /**
          * Returns a new Size set to (0.0, 0.0)
@@ -2270,18 +2301,26 @@
         public static Zero(): Size {
             return new Size(0.0, 0.0);
         }
+<<<<<<< HEAD
         /**
          * Returns a new Size set as the addition result of the current Size and the passed one.  
          */
+=======
+
+        public static Zero3D(): Size {
+            return new Size(0, 0, 0);
+        }
+
+>>>>>>> bc4f57a... Allow for 3d texture sizes
         public add(otherSize: Size): Size {
-            let r = new Size(this.width + otherSize.width, this.height + otherSize.height);
+            let r = new Size(this.width + otherSize.width, this.height + otherSize.height, this.depth !== undefined ? this.depth + otherSize.depth : undefined);
             return r;
         }
         /**
          * Returns a new Size set as the subtraction result of  the passed one from the current Size.
          */
         public subtract(otherSize: Size): Size {
-            let r = new Size(this.width - otherSize.width, this.height - otherSize.height);
+            let r = new Size(this.width - otherSize.width, this.height - otherSize.height, this.depth !== undefined ? this.depth - otherSize.depth : undefined);
             return r;
         }
         /**
@@ -2290,8 +2329,11 @@
         public static Lerp(start: Size, end: Size, amount: number): Size {
             var w = start.width + ((end.width - start.width) * amount);
             var h = start.height + ((end.height - start.height) * amount);
-
-            return new Size(w, h);
+            var d;
+            if (start.depth !== undefined) {
+                d = start.depth + ((end.depth - start.depth) * amount);
+            }
+            return new Size(w, h, d);
         }
 
     }
