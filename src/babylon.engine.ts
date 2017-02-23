@@ -2982,7 +2982,7 @@
             }
 
             this.activateTexture(this._gl.TEXTURE0 + channel);
-            var target = texture._depth === null ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+            var target = texture._depth === undefined ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
             this._bindTextureDirectly(target, texture);
         }
 
