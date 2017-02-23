@@ -2196,16 +2196,11 @@
     export class Size implements ISize {
         width: number;
         height: number;
-<<<<<<< HEAD
+        depth: number;
         /**
          * Creates a Size object from the passed width and height (floats).  
          */
-        public constructor(width: number, height: number) {
-=======
-        depth: number;
-
         public constructor(width: number, height: number, depth?: number) {
->>>>>>> bc4f57a... Allow for 3d texture sizes
             this.width = width;
             this.height = height;
             this.depth = depth;
@@ -2238,32 +2233,22 @@
             this.height = src.height;
             this.depth = src.depth;
         }
-<<<<<<< HEAD
+
         /**
          * Updates in place the current Size from the passed floats.  
          * Returns the updated Size.   
          */
-        public copyFromFloats(width: number, height: number): Size {
-            this.width = width;
-            this.height = height;
-            return this;
-        }
-        /**
-         * Returns a new Size set with the multiplication result of the current Size and the passed floats.  
-         */
-        public multiplyByFloats(w: number, h: number): Size {
-            return new Size(this.width * w, this.height * h);
-=======
-
         public copyFromFloats(width: number, height: number, depth?: number) {
             this.width = width;
             this.height = height;
             this.depth = depth;
         }
 
+        /**
+         * Returns a new Size set with the multiplication result of the current Size and the passed floats.  
+         */
         public multiplyByFloats(w: number, h: number, d?: number): Size {
             return new Size(this.width * w, this.height * h, this.depth !== undefined ? this.depth * d : undefined);
->>>>>>> bc4f57a... Allow for 3d texture sizes
         }
         /**
          * Returns a new Size copied from the passed one.  
@@ -2278,12 +2263,8 @@
             if (!other) {
                 return false;
             }
-<<<<<<< HEAD
-            return (this.width === other.width) && (this.height === other.height);
-=======
 
             return (this.width === other.width) && (this.height === other.height) && (this.depth == other.depth);
->>>>>>> bc4f57a... Allow for 3d texture sizes
         }
         /**
          * Returns the surface of the Size : width * height (float).  
@@ -2301,17 +2282,14 @@
         public static Zero(): Size {
             return new Size(0.0, 0.0);
         }
-<<<<<<< HEAD
-        /**
-         * Returns a new Size set as the addition result of the current Size and the passed one.  
-         */
-=======
 
         public static Zero3D(): Size {
             return new Size(0, 0, 0);
         }
 
->>>>>>> bc4f57a... Allow for 3d texture sizes
+        /**
+         * Returns a new Size set as the addition result of the current Size and the passed one.  
+         */
         public add(otherSize: Size): Size {
             let r = new Size(this.width + otherSize.width, this.height + otherSize.height, this.depth !== undefined ? this.depth + otherSize.depth : undefined);
             return r;

@@ -135,7 +135,7 @@
             this._texture = this._getFromCache(this.url, this._noMipmap, this._samplingMode);
 
             if (!this._texture) {
-                this._texture = this.getScene().getEngine().createTexture(this.url, this._noMipmap, this._invertY, this.getScene(), this._samplingMode, this._delayedOnLoad, this._delayedOnError, this._buffer, null, this._format, customTextureParser);
+                this._texture = this.getScene().getEngine().createTexture(this.url, this._noMipmap, this._invertY, this.getScene(), this._samplingMode, this._delayedOnLoad, this._delayedOnError, this._buffer, null, this._format, this._customTextureParser);
                 if (this._deleteBuffer) {
                     delete this._buffer;
                 }
