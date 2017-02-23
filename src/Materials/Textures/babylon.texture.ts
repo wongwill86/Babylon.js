@@ -69,11 +69,15 @@
         private _buffer: any;
         private _deleteBuffer: boolean;
         protected _format: number;
+        private _customTextureParser: Internals.CustomTextureParserConstructor;
         private _delayedOnLoad: () => void;
         private _delayedOnError: () => void;
         private _onLoadObservarble: Observable<boolean>;
 
-        constructor(url: string, scene: Scene, noMipmap: boolean = false, invertY: boolean = true, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, onLoad: () => void = null, onError: () => void = null, buffer: any = null, deleteBuffer: boolean = false, format: number = Engine.TEXTUREFORMAT_RGBA) {
+        constructor(url: string, scene: Scene, noMipmap: boolean = false, invertY: boolean = true, samplingMode: number = Texture.TRILINEAR_SAMPLINGMODE, onLoad: () => void = null, onError: () => void = null, buffer: any = null, deleteBuffer: boolean = false, format: number = Engine.TEXTUREFORMAT_RGBA, customTextureParser?: Internals.CustomTextureParserConstructor) {
+            super(scene);
+
+            this.name = url;
             super(scene);
 
             this.name = url;
@@ -84,6 +88,7 @@
             this._buffer = buffer;
             this._deleteBuffer = deleteBuffer;
             this._format = format;
+            this._customTextureParser = customTextureParser;
 
             if (!url) {
                 return;
@@ -102,7 +107,7 @@
 
             if (!this._texture) {
                 if (!scene.useDelayedTextureLoading) {
-                    this._texture = scene.getEngine().createTexture(url, noMipmap, invertY, scene, this._samplingMode, load, onError, this._buffer, null, this._format);
+                    this._texture = scene.getEngine().createTexture(url, noMipmap, invertY, scene, this._samplingMode, load, onError, this._buffer, null, this._format, customTextureParser);
                     if (deleteBuffer) {
                         delete this._buffer;
                     }
@@ -130,7 +135,7 @@
             this._texture = this._getFromCache(this.url, this._noMipmap, this._samplingMode);
 
             if (!this._texture) {
-                this._texture = this.getScene().getEngine().createTexture(this.url, this._noMipmap, this._invertY, this.getScene(), this._samplingMode, this._delayedOnLoad, this._delayedOnError, this._buffer, null, this._format);
+                this._texture = this.getScene().getEngine().createTexture(this.url, this._noMipmap, this._invertY, this.getScene(), this._samplingMode, this._delayedOnLoad, this._delayedOnError, this._buffer, null, this._format, customTextureParser);
                 if (this._deleteBuffer) {
                     delete this._buffer;
                 }
