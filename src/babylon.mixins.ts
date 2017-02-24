@@ -51,7 +51,7 @@ interface WebGLRenderingContext {
     texImage3D(target: number, level: number, internalformat: number, width: number, height: number, depth: number, border: number, format: number, type: number, pixels?: ArrayBufferView): void;
 }
 
-interface AudioContext extends EventTarget {
+interface AudioContextBase extends EventTarget {
     decodeAudioData(audioData: ArrayBuffer, successCallback: DecodeSuccessCallback, errorCallback?: any): void;
 }
 
@@ -84,6 +84,7 @@ interface CanvasRenderingContext2D {
     mozImageSmoothingEnabled: boolean;
     oImageSmoothingEnabled: boolean;
     webkitImageSmoothingEnabled: boolean;
+    msImageSmoothingEnabled: boolean;
 }
 
 interface WebGLTexture {
