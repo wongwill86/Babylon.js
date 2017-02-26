@@ -1,18 +1,16 @@
 module BABYLON.Internals {
     /*
      * Helper interface to pass class constructor into functions.
-     * This constructor must set height/width/depth.
+     * Engine is really just a way to get the WebGLRenderingContext we are using
      */
     export interface CustomTextureParserConstructor {
-        new (gl: WebGLRenderingContext, arrayBuffer: any): CustomTextureParser;
+        new (engine: Engine, arrayBuffer: any): CustomTextureParser;
     }
 
     /*
-     * Implement this interface and pass into creatTexture to parse custom texture files
+     * Implement this interface and pass into createTexture to parse custom texture files
      */
     export interface CustomTextureParser {
-        gl : WebGLRenderingContext;
-
         target : number;
         level : number;
         internalFormat : number;

@@ -2130,7 +2130,7 @@
             if (isKTX || isTGA || isDDS || customTextureParser !== undefined){
                 if (customTextureParser !== undefined) {
                     callback = (data) => {
-                        var textureParser = new customTextureParser(this._gl, data);
+                        var textureParser = new customTextureParser(this, data);
 
                         prepareWebGLTexture(texture, this._gl, scene, textureParser.width, textureParser.height, textureParser.depth, invertY, noMipmap, false, () => {
                             textureParser.upload();
