@@ -305,7 +305,7 @@
                 result = result.replace(/textureCube\(/g, "texture(");
                 result = result.replace(/gl_FragDepthEXT/g, "gl_FragDepth");
                 result = result.replace(/gl_FragColor/g, "glFragColor");
-                result = result.replace(/void\s+?main\(/g, "out vec4 glFragColor;\nvoid main(");
+                result = result.replace(/void\s+?main\(/g, "layout(location = 0) out vec4 glFragColor;\nvoid main(");
             }
             
             callback(result);
