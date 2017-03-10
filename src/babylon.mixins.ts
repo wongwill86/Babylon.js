@@ -43,10 +43,11 @@ interface WebGLRenderingContext {
     blitFramebuffer(srcX0: number, srcY0: number, srcX1: number, srcY1: number, dstX0: number, dstY0: number, dstX1: number, dstY1: number, mask: number, filter: number): void;
     renderbufferStorageMultisample(target: number, samples: number, internalformat: number, width: number, height: number): void;
 
-    MAX_SAMPLES: number;
-    RGBA8: number;
-    READ_FRAMEBUFFER: number;
-    DRAW_FRAMEBUFFER: number;
+    readonly MAX_SAMPLES: number;
+    readonly RGBA8: number;
+    readonly READ_FRAMEBUFFER: number;
+    readonly DRAW_FRAMEBUFFER: number;
+    readonly TEXTURE_3D: number;
 }
 
 interface HTMLURL {
@@ -91,12 +92,15 @@ interface WebGLTexture {
     generateMipMaps: boolean;
     samples: number;
     type: number;
+	target : number;
     onLoadedCallbacks: Array<Function>;
     _size: number;
     _baseWidth: number;
     _baseHeight: number;
+    _baseDepth: number;
     _width: number;
     _height: number;
+    _depth: number;
     _workingCanvas: HTMLCanvasElement;
     _workingContext: CanvasRenderingContext2D;
     _framebuffer: WebGLFramebuffer;

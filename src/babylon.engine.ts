@@ -2266,6 +2266,7 @@
         public updateRawTexture(texture: WebGLTexture, data: ArrayBufferView, format: number, invertY: boolean, compression: string = null): void {
             var internalFormat = this._getInternalFormat(format);
             this._bindTextureDirectly(this._gl.TEXTURE_2D, texture);
+
             this._gl.pixelStorei(this._gl.UNPACK_FLIP_Y_WEBGL, invertY === undefined ? 1 : (invertY ? 1 : 0));
 
             if (texture._width % 4 !== 0) {
@@ -2796,12 +2797,14 @@
             return texture;
         }
 
-        public updateTextureSize(texture: WebGLTexture, width: number, height: number) {
+        public updateTextureSize(texture: WebGLTexture, width: number, height: number, depth?: number) {
             texture._width = width;
             texture._height = height;
-            texture._size = width * height;
+            texture._depth = depth;
+            texture._size = depth !== undefined ? width * height * depth : width * height;
             texture._baseWidth = width;
             texture._baseHeight = height;
+            texture._baseDepth = depth;
         }
 
         public createRawCubeTexture(url: string, scene: Scene, size: number, format: number, type: number, noMipmap: boolean,
@@ -3033,7 +3036,8 @@
             }
 
             this.activateTexture(this._gl.TEXTURE0 + channel);
-            this._bindTextureDirectly(this._gl.TEXTURE_2D, texture);
+            var target = texture._depth !== undefined ? this._gl.TEXTURE_3D : this._gl.TEXTURE_2D;
+            this._bindTextureDirectly(target, texture);
         }
 
         public setTextureFromPostProcess(channel: number, postProcess: PostProcess): void {
@@ -3063,6 +3067,7 @@
                 if (this._activeTexturesCache[channel] != null) {
                     this.activateTexture(this._gl["TEXTURE" + channel]);
                     this._bindTextureDirectly(this._gl.TEXTURE_2D, null);
+                    this._bindTextureDirectly(this._gl.TEXTURE_3D, null);
                     this._bindTextureDirectly(this._gl.TEXTURE_CUBE_MAP, null);
                 }
                 return;
@@ -3102,20 +3107,21 @@
 
                 this._setAnisotropicLevel(this._gl.TEXTURE_CUBE_MAP, texture);
             } else {
-                this._bindTextureDirectly(this._gl.TEXTURE_2D, internalTexture);
+                var target = texture.is3D() ? this._gl.TEXTURE_3D : this._gl.TEXTURE_2D;
+                this._bindTextureDirectly(target, internalTexture);
 
                 if (internalTexture._cachedWrapU !== texture.wrapU) {
                     internalTexture._cachedWrapU = texture.wrapU;
 
                     switch (texture.wrapU) {
                         case Texture.WRAP_ADDRESSMODE:
-                            this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.REPEAT);
+                            this._gl.texParameteri(target, this._gl.TEXTURE_WRAP_S, this._gl.REPEAT);
                             break;
                         case Texture.CLAMP_ADDRESSMODE:
-                            this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
+                            this._gl.texParameteri(target, this._gl.TEXTURE_WRAP_S, this._gl.CLAMP_TO_EDGE);
                             break;
                         case Texture.MIRROR_ADDRESSMODE:
-                            this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_S, this._gl.MIRRORED_REPEAT);
+                            this._gl.texParameteri(target, this._gl.TEXTURE_WRAP_S, this._gl.MIRRORED_REPEAT);
                             break;
                     }
                 }
@@ -3124,18 +3130,18 @@
                     internalTexture._cachedWrapV = texture.wrapV;
                     switch (texture.wrapV) {
                         case Texture.WRAP_ADDRESSMODE:
-                            this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.REPEAT);
+                            this._gl.texParameteri(target, this._gl.TEXTURE_WRAP_T, this._gl.REPEAT);
                             break;
                         case Texture.CLAMP_ADDRESSMODE:
-                            this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
+                            this._gl.texParameteri(target, this._gl.TEXTURE_WRAP_T, this._gl.CLAMP_TO_EDGE);
                             break;
                         case Texture.MIRROR_ADDRESSMODE:
-                            this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_WRAP_T, this._gl.MIRRORED_REPEAT);
+                            this._gl.texParameteri(target, this._gl.TEXTURE_WRAP_T, this._gl.MIRRORED_REPEAT);
                             break;
                     }
                 }
 
-                this._setAnisotropicLevel(this._gl.TEXTURE_2D, texture);
+                this._setAnisotropicLevel(target, texture);
             }
         }
 
