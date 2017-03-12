@@ -2342,6 +2342,35 @@
             return texture;
         }
 
+        public createCustomTexture(width: number, height: number, depth: number | undefined, generateMipMaps: boolean, samplingMode: number): WebGLTexture {
+            var texture = this._gl.createTexture();
+            texture._baseWidth = width;
+            texture._baseHeight = height;
+            texture._baseDepth = depth;
+
+            if (generateMipMaps) {
+                width = Tools.GetExponentOfTwo(width, this._caps.maxTextureSize);
+                height = Tools.GetExponentOfTwo(height, this._caps.maxTextureSize);
+                depth = Tools.GetExponentOfTwo(depth, this._caps.maxTextureSize);
+            }
+
+            this.resetTextureCache();
+            texture._width = width;
+            texture._height = height;
+            texture._depth = depth;
+            texture.isReady = false;
+            texture.generateMipMaps = generateMipMaps;
+            texture.references = 1;
+            texture.samplingMode = samplingMode;
+            texture.target = depth == undefined ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+
+            this.updateTextureSamplingMode(samplingMode, texture);
+
+            this._loadedTexturesCache.push(texture);
+
+            return texture;
+        }
+
         public updateTextureSamplingMode(samplingMode: number, texture: WebGLTexture): void {
             var filters = getSamplingParameters(samplingMode, texture.generateMipMaps, this._gl);
 
@@ -2352,11 +2381,13 @@
                 this._gl.texParameteri(this._gl.TEXTURE_CUBE_MAP, this._gl.TEXTURE_MIN_FILTER, filters.min);
                 this._bindTextureDirectly(this._gl.TEXTURE_CUBE_MAP, null);
             } else {
-                this._bindTextureDirectly(this._gl.TEXTURE_2D, texture);
+                var target = texture._depth === undefined ?  this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
 
-                this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MAG_FILTER, filters.mag);
-                this._gl.texParameteri(this._gl.TEXTURE_2D, this._gl.TEXTURE_MIN_FILTER, filters.min);
-                this._bindTextureDirectly(this._gl.TEXTURE_2D, null);
+                this._bindTextureDirectly(target, texture);
+
+                this._gl.texParameteri(target, this._gl.TEXTURE_MAG_FILTER, filters.mag);
+                this._gl.texParameteri(target, this._gl.TEXTURE_MIN_FILTER, filters.min);
+                this._bindTextureDirectly(target, null);
             }
 
             texture.samplingMode = samplingMode;
