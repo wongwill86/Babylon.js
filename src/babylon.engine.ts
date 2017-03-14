@@ -155,6 +155,7 @@
     export class EngineCapabilities {
         public maxTexturesImageUnits: number;
         public maxTextureSize: number;
+        public max3DTextureSize?: number;
         public maxCubemapTextureSize: number;
         public maxRenderTextureSize: number;
         public maxVertexAttribs: number;
@@ -598,6 +599,9 @@
             this._caps = new EngineCapabilities();
             this._caps.maxTexturesImageUnits = this._gl.getParameter(this._gl.MAX_TEXTURE_IMAGE_UNITS);
             this._caps.maxTextureSize = this._gl.getParameter(this._gl.MAX_TEXTURE_SIZE);
+            if (this._webGLVersion > 1) {
+              this._caps.max3DTextureSize = this._gl.getParameter(this._gl.MAX_3D_TEXTURE_SIZE);
+            }
             this._caps.maxCubemapTextureSize = this._gl.getParameter(this._gl.MAX_CUBE_MAP_TEXTURE_SIZE);
             this._caps.maxRenderTextureSize = this._gl.getParameter(this._gl.MAX_RENDERBUFFER_SIZE);
             this._caps.maxVertexAttribs = this._gl.getParameter(this._gl.MAX_VERTEX_ATTRIBS);
@@ -2342,27 +2346,39 @@
             return texture;
         }
 
-        public createCustomTexture(width: number, height: number, depth: number | undefined, generateMipMaps: boolean, samplingMode: number): WebGLTexture {
+        /*
+         * Create a bare bones WebGLTexture with all necessary mixin fields set. 
+         * May modify options[width|heigh|depth] if generateMipMaps is set.
+         */
+        public createCustomTexture(generateMipMaps: boolean, samplingMode: number, options: CustomTextureOptions): WebGLTexture {
+            if (options.depth && this._webGLVersion < 2) {
+                throw new Error("3D Textures not available for WebGL < 2.0");
+            }
+
             var texture = this._gl.createTexture();
-            texture._baseWidth = width;
-            texture._baseHeight = height;
-            texture._baseDepth = depth;
+            texture._baseWidth = options.width;
+            texture._baseHeight = options.height;
+            texture._baseDepth = options.depth;
 
             if (generateMipMaps) {
-                width = Tools.GetExponentOfTwo(width, this._caps.maxTextureSize);
-                height = Tools.GetExponentOfTwo(height, this._caps.maxTextureSize);
-                depth = Tools.GetExponentOfTwo(depth, this._caps.maxTextureSize);
+                var maxTextureSize = this._caps.maxTextureSize;
+                if (options.depth) {
+                  maxTextureSize = this._caps.max3DTextureSize;
+                }
+
+                options.width = Tools.GetExponentOfTwo(options.width, maxTextureSize);
+                options.height = Tools.GetExponentOfTwo(options.height, maxTextureSize);
+                options.depth = Tools.GetExponentOfTwo(options.depth, maxTextureSize);
             }
 
             this.resetTextureCache();
-            texture._width = width;
-            texture._height = height;
-            texture._depth = depth;
+            texture._width = options.width;
+            texture._height = options.height;
+            texture._depth = options.depth;
             texture.isReady = false;
             texture.generateMipMaps = generateMipMaps;
             texture.references = 1;
             texture.samplingMode = samplingMode;
-            texture.target = depth == undefined ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
 
             this.updateTextureSamplingMode(samplingMode, texture);
 
@@ -2410,6 +2426,13 @@
             }
             this.resetTextureCache();
             texture.isReady = true;
+        }
+
+        public updateCustomTexture(texture: WebGLTexture, options: CustomTextureOptions, updateFunction: CustomTextureUpdateFunction, src: any, offsets: CustomTextureOffsets): void {
+            let target = options.depth == undefined ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
+            this._bindTextureDirectly(target, texture);
+            updateFunction(src, this._gl, options, offsets);
+            this._bindTextureDirectly(target, null);
         }
 
         public updateVideoTexture(texture: WebGLTexture, video: HTMLVideoElement, invertY: boolean): void {

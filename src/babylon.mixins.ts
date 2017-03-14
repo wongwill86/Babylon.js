@@ -43,11 +43,18 @@ interface WebGLRenderingContext {
     blitFramebuffer(srcX0: number, srcY0: number, srcX1: number, srcY1: number, dstX0: number, dstY0: number, dstX1: number, dstY1: number, mask: number, filter: number): void;
     renderbufferStorageMultisample(target: number, samples: number, internalformat: number, width: number, height: number): void;
 
+    texImage3D(target: number, level: number, internalformat: number, width: number, height: number,
+        depth: number, border: number, format: number, type: number, srcData: ArrayBufferView | null): void;
+    texSubImage3D(target: number, level: number, xoffset: number, yoffset: number, zoffset: number,
+        width: number, height: number, depth: number, format: number, type: number,
+        srcData: ArrayBufferView | null): void;
+
     readonly MAX_SAMPLES: number;
     readonly RGBA8: number;
     readonly READ_FRAMEBUFFER: number;
     readonly DRAW_FRAMEBUFFER: number;
     readonly TEXTURE_3D: number;
+    readonly MAX_3D_TEXTURE_SIZE: number;
 }
 
 interface HTMLURL {
@@ -92,7 +99,6 @@ interface WebGLTexture {
     generateMipMaps: boolean;
     samples: number;
     type: number;
-	target : number;
     onLoadedCallbacks: Array<Function>;
     _size: number;
     _baseWidth: number;
