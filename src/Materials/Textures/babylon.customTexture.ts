@@ -44,12 +44,12 @@ module BABYLON {
             this._texture = this.getScene().getEngine().createCustomTexture(!this.noMipmap, this._samplingMode, this.options);
         }
 
-        public update(src: any, offsets: CustomTextureOffsets, updateFunction: CustomTextureUpdateFunction = CustomTexture.defaultUpdateFunction): void {
-            this.getScene().getEngine().updateCustomTexture(this._texture, this.options, updateFunction, src, offsets);
+        public update(src: any, offsets?: CustomTextureOffsets, updateFunction: CustomTextureUpdateFunction = CustomTexture.defaultUpdateFunction): void {
+            this.getScene().getEngine().updateCustomTexture(this._texture, this.options, src, offsets, updateFunction);
         }
 
         public static defaultUpdateFunction(src: any, gl: WebGLRenderingContext, options: CustomTextureOptions, offsets: CustomTextureOffsets): void {
-          if (offsets.xoffset && offsets.yoffset) {
+          if (offsets && offsets.xoffset && offsets.yoffset) {
             if (options.depth && offsets.zoffset) {
               gl.texSubImage3D(gl.TEXTURE_3D, options.level,
                                offsets.xoffset, offsets.yoffset, offsets.zoffset,

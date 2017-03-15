@@ -2428,11 +2428,12 @@
             texture.isReady = true;
         }
 
-        public updateCustomTexture(texture: WebGLTexture, options: CustomTextureOptions, updateFunction: CustomTextureUpdateFunction, src: any, offsets: CustomTextureOffsets): void {
+        public updateCustomTexture(texture: WebGLTexture, options: CustomTextureOptions, src: any, offsets: CustomTextureOffsets, updateFunction: CustomTextureUpdateFunction): void {
             let target = options.depth == undefined ? this._gl.TEXTURE_2D : this._gl.TEXTURE_3D;
             this._bindTextureDirectly(target, texture);
             updateFunction(src, this._gl, options, offsets);
             this._bindTextureDirectly(target, null);
+            texture.isReady = true;
         }
 
         public updateVideoTexture(texture: WebGLTexture, video: HTMLVideoElement, invertY: boolean): void {

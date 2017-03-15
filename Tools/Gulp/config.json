@@ -81,6 +81,7 @@
             "../../src/Materials/Textures/babylon.mirrorTexture.js",
             "../../src/Materials/Textures/babylon.refractionTexture.js",
             "../../src/Materials/Textures/babylon.dynamicTexture.js",
+            "../../src/Materials/Textures/babylon.customTexture.js",
             "../../src/Materials/Textures/babylon.videoTexture.js",
             "../../src/Materials/Textures/Procedurals/babylon.customProceduralTexture.js",
             "../../src/Materials/babylon.effect.js",
